@@ -1,27 +1,32 @@
 // create web server
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
 
-// create a route
-app.get('/comments', function(request, response) {
-  // send the response
-  response.json([
-    {
-      "id": 1,
-      "author": "Morgan McCircuit",
-      "body": "Great picture!"
-    },
-    {
-      "id": 2,
-      "author": "Bending Bender",
-      "body": "Excellent stuff"
-    }
-  ]);
+app.use(bodyParser.json());
+
+// create in-memory database
+var comments = [
+  {id: 1, author: "Pete Hunt", text: "This is one comment"},
+  {id: 2, author: "Jordan Walke", text: "This is *another* comment"}
+];
+
+app.get('/api/comments', function(req, res) {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(JSON.stringify(comments));
 });
 
-// start the server
+app.post('/api/comments', function(req, res) {
+  var newComment = req.body;
+  newComment.id = Date.now();
+  comments.push(newComment);
+  res.setHeader('Content-Type', 'application/json');
+  res.send(JSON.stringify(newComment));
+});
+
 app.listen(3000, function() {
-  console.log('Server is running on port 3000');
+  console.log('Server started: http://localhost:3000/');
 });
+```
 
-
+####
