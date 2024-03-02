@@ -1,4 +1,4 @@
-// create web server
+
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
@@ -27,6 +27,4 @@ app.post('/api/comments', function(req, res) {
 app.listen(3000, function() {
   console.log('Server started: http://localhost:3000/');
 });
-```
 
-####
