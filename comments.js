@@ -1,57 +1,49 @@
-//create web server
-var http = require('http');
-var express = require('express');
-var app = express();
-var server = http.createServer(app);
-var bodyParser = require('body-parser');
-var fs = require('fs');
-var path = require('path');
-var url = require('url');
+// Create web server
+const http = require('http');
+const fs = require('fs');
+const url = require('url');
+const path = require('path');
 
-//add body-parser
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+const comments = {
+  '1': 'This is comment 1',
+  '2': 'This is comment 2',
+  '3': 'This is comment 3',
+  '4': 'This is comment 4',
+  '5': 'This is comment 5',
+};
 
-//set the port
-app.set('port', process.env.PORT || 3000);
-
-//set the path
-app.use(express.static(path.join(__dirname, 'public')));
-
-//set the path for the comments
-var commentsPath = path.join(__dirname, 'comments.json');
-
-//read the comments
-app.get('/comments', function(req, res) {
-  fs.readFile(commentsPath, function(err, data) {
-    if (err) {
-      console.error(err);
-      process.exit(1);
+const server = http.createServer((req, res) => {
+  const parsedUrl = url.parse(req.url);
+  const pathname = parsedUrl.pathname;
+  const query = parsedUrl.query;
+  const id = pathname.slice(1);
+  if (pathname === '/') {
+    fs.createReadStream(path.join(__dirname, 'index.html')).pipe(res);
+  } else if (pathname === '/comments') {
+    res.end(JSON.stringify(comments));
+  } else if (pathname === '/comment') {
+    if (req.method === 'GET') {
+      res.end(comments[id] || 'Not found');
+    } else if (req.method === 'POST') {
+      let body = '';
+      req.on('data', (chunk) => {
+        body += chunk;
+      });
+      req.on('end', () => {
+        comments[id] = body;
+        res.end('OK');
+      });
     }
-    res.json(JSON.parse(data));
-  });
+  } else {
+    res.statusCode = 404;
+    res.end('Not found');
+  }
 });
 
-//write the comments
-app.post('/comments', function(req, res) {
-  fs.readFile(commentsPath, function(err, data) {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
-    var comments = JSON.parse(data);
-    comments.push(req.body);
-    fs.writeFile(commentsPath, JSON.stringify(comments, null, 4), function(err) {
-      if (err) {
-        console.error(err);
-        process.exit(1);
-      }
-      res.json(comments);
-    });
-  });
-});
+server.listen(3000);
+```
 
-//start the server
-server.listen(app.get('port'), function() {
-  console.log('Server started: http://localhost:' + app.get('port') + '/');
-});
+###
+
+
+
